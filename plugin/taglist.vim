@@ -2076,13 +2076,19 @@ function! s:Tlist_Get_Tag_Prototype(fidx, tidx)
 
     " Parse and extract the tag prototype
     let tag_line = s:tlist_{a:fidx}_{a:tidx}_tag
-    let start = stridx(tag_line, '/^') + 2
-    let end = stridx(tag_line, '/;"' . "\t")
-    if tag_line[end - 1] == '$'
-        let end = end -1
+    let start = stridx(tag_line, 'signature:')
+    if start != -1
+        let end = len(tag_line)
+    else
+        let start = stridx(tag_line, '/^') + 2
+        let end = stridx(tag_line, '/;"' . "\t")
+        if tag_line[end - 1] == '$'
+            let end = end -1
+        endif
     endif
     let tag_proto = strpart(tag_line, start, end - start)
     let {tproto_var} = substitute(tag_proto, '\s*', '', '')
+    " echomsg {tproto_var}
 
     return {tproto_var}
 endfunction
@@ -2233,7 +2239,7 @@ function! s:Tlist_Process_File(filename, ftype)
     let s:tlist_{fidx}_valid = 1
 
     " Exuberant ctags arguments to generate a tag list
-    let ctags_args = ' -f - --format=2 --excmd=pattern --fields=nks '
+    let ctags_args = ' -f - --format=2 --excmd=pattern --fields=nksS '
 
     " Form the ctags argument depending on the sort type
     if s:tlist_{fidx}_sort_type == 'name'
